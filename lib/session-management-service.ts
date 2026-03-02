@@ -3,7 +3,7 @@
  * Handles real-time session tracking, device management, and cross-device notifications
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)

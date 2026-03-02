@@ -11,9 +11,13 @@ import React, {
 } from 'react';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
-// Local helper function - no import needed
-function isSupabaseConfigured() {
-	return !!(typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+/**
+ * Local helper to check if Supabase is properly configured
+ * Note: This function is defined locally and NOT imported to avoid circular dependencies
+ */
+function isSupabaseConfigured(): boolean {
+	if (typeof window === 'undefined') return false;
+	return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
 interface RealtimeSubscription {
