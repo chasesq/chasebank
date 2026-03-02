@@ -862,11 +862,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   const handleOpenAccount = async () => {
-    setAccountOpenError("")
     setIsOpeningAccount(true)
+    setAccountOpenError("")
 
     try {
-      // Get the current logged-in user or create a temp user session
       const currentUser = localStorage.getItem("chase_current_user")
       let userId = currentUser ? JSON.parse(currentUser).id : "guest_user_" + Date.now()
 
@@ -889,6 +888,49 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       }
 
       console.log("[v0] Account opened successfully:", data)
+
+      // Add account to banking context for immediate real-time access
+      const { addAccount } = useBanking()
+      if (addAccount && data.account) {
+        addAccount({
+          name: data.account.name || accountName.trim() || "My Checking Account",
+          type: data.account.type || "checking",
+          balance: data.account.balance || 0,
+          availableBalance: data.account.availableBalance || 0,
+          accountNumber: data.account.accountNumber,
+          routingNumber: data.account.routingNumber,
+          interestRate: data.account.interestRate,
+        })
+      }
+
+      // Subscribe to real-time updates for the new account
+      if (data.realtime && typeof window !== 'undefined') {
+        // Store account for real-time sync
+        const accounts = JSON.parse(localStorage.getItem("chase_accounts") || "[]")
+        accounts.push(data.account)
+        localStorage.setItem("chase_accounts", JSON.stringify(accounts))
+      }
+
+      toast({
+        title: "Account Opened Successfully",
+        description: `Your new checking account ending in ${data.account.accountNumber} is ready to use! Funds are available immediately.`,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to open account")
+      }
+
+      console.log("[v0] Account opened successfully:", data)
+
+      // Subscribe to real-time updates for the new account
+      if (data.realtime && typeof window !== 'undefined') {
+        // Store account for real-time sync
+        const accounts = JSON.parse(localStorage.getItem("chase_accounts") || "[]")
+        accounts.push(data.account)
+        localStorage.setItem("chase_accounts", JSON.stringify(accounts))
+      }
 
       toast({
         title: "Account Opened Successfully",

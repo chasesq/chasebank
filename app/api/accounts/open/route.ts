@@ -18,15 +18,16 @@ export async function POST(request: NextRequest) {
     let supabase
     try {
       supabase = createServiceClient()
+      // Verify client is properly initialized
       if (!supabase || typeof supabase.from !== 'function') {
-        throw new Error('Supabase client is not properly initialized')
+        throw new Error('Supabase client initialization failed: missing .from() method')
       }
     } catch (err) {
-      console.error('[v0] Failed to create Supabase client:', err)
-      console.error('[v0] NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'set' : 'NOT SET')
-      console.error('[v0] SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'set' : 'NOT SET')
+      console.error('[v0] Supabase client error:', err instanceof Error ? err.message : String(err))
+      console.error('[v0] Env - URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'set' : 'MISSING')
+      console.error('[v0] Env - Service Role Key:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'set' : 'MISSING')
       return NextResponse.json(
-        { error: 'Database connection error' },
+        { error: 'Database connection failed: ' + (err instanceof Error ? err.message : 'Unknown error') },
         { status: 500 }
       )
     }
@@ -138,25 +139,36 @@ export async function POST(request: NextRequest) {
 
     console.log('[v0] Account created successfully:', account[0].id)
 
+    // Return comprehensive account details for immediate real-time access
     return NextResponse.json({
       message: 'Account opened successfully',
       account: {
         id: account[0].id,
+        userId: account[0].user_id,
         type: accountType,
         accountNumber: accountNumber.slice(-4),
         fullAccountNumber: accountNumber,
         routingNumber,
         balance: initialDeposit,
+        availableBalance: initialDeposit,
         interestRate,
         status: 'active',
+        name: accountName,
         createdAt: account[0].created_at,
+        updatedAt: account[0].updated_at,
       },
       success: true,
+      realtime: true, // Flag for client to subscribe to real-time updates
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, must-revalidate',
+        'X-Real-Time': 'true',
+      }
     })
   } catch (error) {
-    console.error('[v0] Account opening error:', error)
+    console.error('[v0] Account opening error:', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
-      { error: 'Failed to open account' },
+      { error: 'Failed to open account: ' + (error instanceof Error ? error.message : 'Unknown error'), success: false },
       { status: 500 }
     )
   }
