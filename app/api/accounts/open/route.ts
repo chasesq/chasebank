@@ -17,19 +17,11 @@ export async function POST(request: NextRequest) {
   try {
     let supabase
     try {
-      console.log('[v0] Creating Supabase client...')
       supabase = await createServiceClient()
-      console.log('[v0] Supabase client created:', { has_from: typeof supabase?.from })
-      // Verify client is properly initialized
-      if (!supabase || typeof supabase.from !== 'function') {
-        throw new Error('Supabase client initialization failed: missing .from() method')
-      }
     } catch (err) {
       console.error('[v0] Supabase client error:', err instanceof Error ? err.message : String(err))
-      console.error('[v0] Env - URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'set' : 'MISSING')
-      console.error('[v0] Env - Service Role Key:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'set' : 'MISSING')
       return NextResponse.json(
-        { error: 'Database connection failed: ' + (err instanceof Error ? err.message : 'Unknown error') },
+        { error: 'Database connection failed' },
         { status: 500 }
       )
     }
