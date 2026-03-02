@@ -1,32 +1,24 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
 /**
- * Server-side Supabase client using service role key.
- *
- * This app uses custom auth (password hashing + OTP) instead of Supabase Auth,
- * so auth.uid() is not available for RLS policies. We use the service role key
- * to bypass RLS on all server-side operations.
- *
- * IMPORTANT: Only use this in server-side API routes, never expose to client.
+ * Server-side Supabase client for database operations
+ * Uses service role key for full database access
  */
 export async function createServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  
+
   if (!url || !key) {
-    throw new Error('[v0] Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
+    throw new Error('Missing Supabase environment variables')
   }
 
-  const client = createSupabaseClient(url, key, {
+  // Create client with service role credentials
+  const client = createClient(url, key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
   })
-  
-  if (!client || typeof client.from !== 'function') {
-    throw new Error('[v0] Failed to initialize Supabase client')
-  }
-  
+
   return client
 }
