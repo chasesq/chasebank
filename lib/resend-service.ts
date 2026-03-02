@@ -6,7 +6,7 @@
 import { Resend } from 'resend';
 
 // Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export interface EmailResult {
   success: boolean;
@@ -24,7 +24,7 @@ export async function sendOTPEmail(
   userName: string = 'User'
 ): Promise<EmailResult> {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
@@ -83,7 +83,7 @@ export async function sendLoginAlertEmail(
   }
 ): Promise<EmailResult> {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
@@ -144,7 +144,7 @@ export async function sendSecurityAlertEmail(
   details?: string
 ): Promise<EmailResult> {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
@@ -214,7 +214,7 @@ export async function send2FACodeEmail(
   userName: string = 'User'
 ): Promise<EmailResult> {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
@@ -267,7 +267,7 @@ export async function sendWelcomeEmail(
   userName: string
 ): Promise<EmailResult> {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
@@ -329,7 +329,7 @@ export async function sendPasswordResetEmail(
   resetLink: string
 ): Promise<EmailResult> {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
       throw new Error('RESEND_API_KEY is not configured');
     }
 

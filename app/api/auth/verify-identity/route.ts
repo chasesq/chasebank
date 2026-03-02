@@ -1,10 +1,10 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextRequest, NextResponse } from "next/server"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null
 
 interface IdentityVerificationRequest {
   ssn: string
@@ -19,6 +19,13 @@ interface IdentityVerificationRequest {
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Database service not configured" },
+        { status: 503 }
+      )
+    }
+
     const body: IdentityVerificationRequest = await request.json()
     const { ssn, accountNumber, isAuthorizedUser, recoveryType } = body
 

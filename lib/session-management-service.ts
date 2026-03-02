@@ -6,7 +6,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 export interface SessionInfo {
   id: string
@@ -279,6 +279,11 @@ export class SessionManagementService {
         </div>
       `
 
+      if (!resend) {
+        console.warn('[v0] Resend not configured, skipping new device alert email')
+        return
+      }
+
       await resend.emails.send({
         from: 'security@resend.dev',
         to: email,
@@ -330,6 +335,11 @@ export class SessionManagementService {
         </div>
       `
 
+      if (!resend) {
+        console.warn('[v0] Resend not configured, skipping session terminated alert email')
+        return
+      }
+
       await resend.emails.send({
         from: 'security@resend.dev',
         to: email,
@@ -379,6 +389,11 @@ export class SessionManagementService {
           </div>
         </div>
       `
+
+      if (!resend) {
+        console.warn('[v0] Resend not configured, skipping logout all alert email')
+        return
+      }
 
       await resend.emails.send({
         from: 'security@resend.dev',
