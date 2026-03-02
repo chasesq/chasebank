@@ -18,8 +18,13 @@ export async function POST(request: NextRequest) {
     let supabase
     try {
       supabase = createServiceClient()
+      if (!supabase || typeof supabase.from !== 'function') {
+        throw new Error('Supabase client is not properly initialized')
+      }
     } catch (err) {
       console.error('[v0] Failed to create Supabase client:', err)
+      console.error('[v0] NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'set' : 'NOT SET')
+      console.error('[v0] SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'set' : 'NOT SET')
       return NextResponse.json(
         { error: 'Database connection error' },
         { status: 500 }

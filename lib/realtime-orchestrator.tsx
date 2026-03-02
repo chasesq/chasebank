@@ -11,6 +11,8 @@ import React, {
 } from 'react';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
+// v1: Clear build cache
+
 // Helper to check if Supabase is properly configured
 function isSupabaseConfigured() {
 	return !!(typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
