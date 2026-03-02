@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // GET /api/settings - Get user settings
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
 
     if (!userId) {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 // PATCH /api/settings - Update user settings
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const {
       theme,
@@ -134,7 +134,7 @@ export async function PATCH(request: NextRequest) {
 // POST /api/settings/session-timeout - Update auto-logout timeout
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const { sessionTimeout } = await request.json()
 

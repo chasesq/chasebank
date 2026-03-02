@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // GET /api/credit/journey - Get credit journey and tips
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
 
     if (!userId) {

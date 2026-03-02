@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // GET /api/notifications - Fetch user notifications
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const { searchParams } = new URL(request.url)
     const unreadOnly = searchParams.get('unreadOnly') === 'true'
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 // PATCH /api/notifications - Mark notification as read
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const { notificationId, markAllAsRead } = await request.json()
 
@@ -115,7 +115,7 @@ export async function PATCH(request: NextRequest) {
 // DELETE /api/notifications - Delete notification
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const { searchParams } = new URL(request.url)
     const notificationId = searchParams.get('notificationId')
@@ -156,7 +156,7 @@ export async function DELETE(request: NextRequest) {
 // POST /api/notifications/preferences - Update notification preferences
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const {
       emailNotifications,

@@ -9,7 +9,7 @@ import { TransactionAlertService } from '@/lib/transaction-alert-service'
 // GET /api/transactions - Fetch user transactions with real-time sync
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const accountId = request.nextUrl.searchParams.get('accountId')
     const days = parseInt(request.nextUrl.searchParams.get('days') || '30')
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 // POST /api/transactions - Create new transaction
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const {
       accountId,

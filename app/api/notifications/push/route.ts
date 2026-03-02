@@ -9,7 +9,7 @@ import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const { userId, title, message, data, broadcastToAllDevices } = await request.json()
 
     if (!userId || !title || !message) {

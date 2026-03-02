@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const { authorizedUserName, accountHolder, relation, recoveryType } = await request.json()
 
     if (!authorizedUserName || !accountHolder || !relation) {

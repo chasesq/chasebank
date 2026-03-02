@@ -9,7 +9,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // POST /api/transfers - Process transfer (wire, Zelle, ACH, internal, bill pay)
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const {
       action, // 'wire' | 'zelle' | 'ach' | 'internal' | 'bill_pay'
@@ -357,7 +357,7 @@ export async function POST(request: NextRequest) {
 // GET /api/transfers - Fetch transfer history
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const accountId = request.nextUrl.searchParams.get('accountId')
 

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     // Action 1: Generate TOTP setup
     if (action === 'generate') {

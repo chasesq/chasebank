@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // GET /api/zelle - Get Zelle contacts and transfer history
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'contacts' // 'contacts' | 'history'
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 // POST /api/zelle - Send Zelle transfer or add contact
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const {
       action, // 'send' | 'add_contact'
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/zelle - Remove Zelle contact
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const { searchParams } = new URL(request.url)
     const contactId = searchParams.get('contactId')

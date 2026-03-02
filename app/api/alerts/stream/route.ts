@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   // Create a ReadableStream for Server-Sent Events
   const stream = new ReadableStream({
     async start(controller) {
-      const supabase = createServiceClient()
+      const supabase = await createServiceClient()
 
       // Send initial connection message
       controller.enqueue(

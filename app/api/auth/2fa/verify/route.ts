@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     // Action 1: Verify during setup
     if (action === 'verify-setup') {

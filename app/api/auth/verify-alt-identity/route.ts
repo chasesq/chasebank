@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const { idType, idNumber, country, recoveryType } = await request.json()
 
     if (!idType || !idNumber) {

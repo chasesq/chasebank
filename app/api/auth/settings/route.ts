@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
     // Handle authentication settings updates
     if (action === undefined && setting) {
-      const supabase = createServiceClient()
+      const supabase = await createServiceClient()
 
       // Find user
       const { data: user, error: findError } = await supabase
