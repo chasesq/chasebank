@@ -9,7 +9,12 @@ import React, {
 	ReactNode,
 	useRef,
 } from 'react';
-import { createClient as createSupabaseClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { createClient as createSupabaseClient } from '@/lib/supabase/client';
+
+// Helper function to check if Supabase is configured
+function isSupabaseConfigured() {
+	return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+}
 
 interface RealtimeSubscription {
 	schema: string;
