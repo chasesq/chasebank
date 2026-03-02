@@ -920,15 +920,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       setAccountOpenSuccess(true)
       setIsOpeningAccount(false)
 
-      // Close modal after short delay
+      // Move to next step in registration - show account setup options
       setTimeout(() => {
-        setModalView("none")
-        setAccountName("")
-        setInitialDeposit("")
-        setFundingSource("existing-account")
-        setAgreeToTerms(false)
-        setAccountOpenSuccess(false)
-      }, 2000)
+        setModalView("more-options") // Show user what to do next with their new account
+      }, 1500)
     } catch (error) {
       console.error("[v0] Account opening error:", error)
       const errorMessage = error instanceof Error ? error.message : "Failed to open account. Please try again."
@@ -2389,6 +2384,77 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               >
                 Cancel
               </button>
+            </div>
+          )}
+
+          {/* More Options Modal - Shows after successful account opening */}
+          {modalView === "more-options" && (
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-8 h-8 text-green-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Created Successfully!</h2>
+                <p className="text-gray-600">Your new Chase account is ready. Here's what you can do next:</p>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <button
+                  onClick={() => setModalView("token-setup")}
+                  className="w-full p-4 border-2 border-[#117aca] rounded-xl hover:bg-blue-50 transition-all flex items-center gap-4 bg-blue-50"
+                >
+                  <div className="w-12 h-12 bg-[#117aca] rounded-full flex items-center justify-center flex-shrink-0">
+                    <Key className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900">Set Up Security Token</p>
+                    <p className="text-sm text-gray-500">Enable two-factor authentication for security</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setModalView("2fa-verify")}
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-[#117aca] hover:bg-blue-50 transition-all flex items-center gap-4"
+                >
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-6 h-6 text-[#117aca]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900">Enable Two-Factor Authentication</p>
+                    <p className="text-sm text-gray-500">Add an extra layer of security to your account</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setModalView("none")}
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-[#117aca] hover:bg-blue-50 transition-all flex items-center gap-4"
+                >
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="w-6 h-6 text-[#117aca]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900">Add Payment Methods</p>
+                    <p className="text-sm text-gray-500">Link debit or credit cards to your account</p>
+                  </div>
+                </button>
+              </div>
+
+              <div className="p-4 bg-green-50 rounded-xl border border-green-200 mb-6">
+                <div className="flex items-start gap-3">
+                  <Building2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-green-900 mb-1">Account Details</p>
+                    <p className="text-sm text-green-700">Your account is now fully accessible. You can start managing your finances immediately through the Chase portal.</p>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={() => setModalView("none")}
+                className="w-full bg-[#117aca] hover:bg-[#0a5a9e] py-3"
+              >
+                Go to Dashboard
+              </Button>
             </div>
           )}
         </div>
