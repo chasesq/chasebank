@@ -17,7 +17,9 @@ export async function POST(request: NextRequest) {
   try {
     let supabase
     try {
-      supabase = createServiceClient()
+      console.log('[v0] Creating Supabase client...')
+      supabase = await createServiceClient()
+      console.log('[v0] Supabase client created:', { has_from: typeof supabase?.from })
       // Verify client is properly initialized
       if (!supabase || typeof supabase.from !== 'function') {
         throw new Error('Supabase client initialization failed: missing .from() method')

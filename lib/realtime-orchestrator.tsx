@@ -11,10 +11,7 @@ import React, {
 } from 'react';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
-/**
- * Local helper to check if Supabase is properly configured
- * Note: This function is defined locally and NOT imported to avoid circular dependencies
- */
+// Local helper function - defined here, not imported
 function isSupabaseConfigured(): boolean {
 	if (typeof window === 'undefined') return false;
 	return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -26,76 +23,53 @@ interface RealtimeSubscription {
 	event: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
 }
 
-interface RealtimeUpdate {
-	schema: string;
-	table: string;
-	event: 'INSERT' | 'UPDATE' | 'DELETE';
-	new: Record<string, any>;
-	old: Record<string, any>;
-	timestamp: string;
-}
-
 interface RealtimeContextType {
-	subscribe: (
-		subscription: RealtimeSubscription,
-		callback: (update: RealtimeUpdate) => void
-	) => () => void;
 	isConnected: boolean;
-	lastUpdate: RealtimeUpdate | null;
-	financeTables: Set<string>;
-	hrTables: Set<string>;
-	inventoryTables: Set<string>;
-	securityTables: Set<string>;
+	subscribe: (subscription: RealtimeSubscription, callback: (payload: any) => void) => string;
+	unsubscribe: (subscriptionId: string) => void;
+	lastEvent: any | null;
 }
 
-const RealtimeContext = createContext<RealtimeContextType | undefined>(
-	undefined
-);
+const RealtimeContext = createContext<RealtimeContextType | undefined>(undefined);
 
-export function RealtimeProvider({ children }: { children: ReactNode }) {
+interface RealtimeProviderProps {
+	children: ReactNode;
+}
+
+export function RealtimeProvider({ children }: RealtimeProviderProps) {
 	const [isConnected, setIsConnected] = useState(false);
-	const [lastUpdate, setLastUpdate] = useState<RealtimeUpdate | null>(null);
-	const subscriptionsRef = useRef<Map<string, Set<(update: RealtimeUpdate) => void>>>(
-		new Map()
-	);
+	const subscriptionsRef = useRef<Map<string, any>>(new Map());
+	const [lastEvent, setLastEvent] = useState<any | null>(null);
+	const supabaseRef = useRef<any | null>(null);
 
-	// Define table groups for each module
-	const financeTables = new Set(['customers', 'accounts', 'transactions', 'transfers', 'bills']);
-	const hrTables = new Set(['departments', 'employee', 'attendance', 'payroll', 'leave_requests']);
-	const inventoryTables = new Set(['categories', 'products', 'suppliers', 'stock_transactions', 'purchase_orders']);
-	const securityTables = new Set(['users', 'roles', 'permissions', 'audit_logs', 'sessions']);
-
-	// Use the singleton client from lib/supabase/client (may be null if not configured)
-	const supabaseRef = useRef<ReturnType<typeof createSupabaseClient> | null>(null);
-	const supabaseInitialized = useRef(false);
-	
-	// Initialize client only once
-	if (!supabaseInitialized.current) {
-		supabaseInitialized.current = true;
-		if (isSupabaseConfigured()) {
-			supabaseRef.current = createSupabaseClient();
+	// Initialize Supabase client
+	useEffect(() => {
+		if (!isSupabaseConfigured()) {
+			console.warn('[v0] Supabase not configured, real-time features disabled');
+			return;
 		}
-	}
-	
-	const supabase = supabaseRef.current;
+
+		try {
+			supabaseRef.current = createSupabaseClient();
+			setIsConnected(true);
+		} catch (error) {
+			console.error('[v0] Failed to initialize Supabase client:', error);
+		}
+	}, []);
 
 	// Subscribe to real-time changes
 	const subscribe = useCallback(
-		(
-			subscription: RealtimeSubscription,
-			callback: (update: RealtimeUpdate) => void
-		) => {
-			if (!supabase || !isSupabaseConfigured()) return () => {};
+		(subscription: RealtimeSubscription, callback: (payload: any) => void) => {
+			if (!supabaseRef.current) {
+				console.warn('[v0] Supabase client not initialized');
+				return '';
+			}
 
-			const key = `${subscription.schema}.${subscription.table}`;
-			const subscriptions = subscriptionsRef.current;
+			const subscriptionId = `${subscription.schema}_${subscription.table}_${Date.now()}`;
 
-			if (!subscriptions.has(key)) {
-				subscriptions.set(key, new Set());
-
-				// Create Supabase realtime subscription
-				const channel = supabase
-					.channel(`${key}-changes`)
+			try {
+				const channel = supabaseRef.current
+					.channel(`${subscription.schema}:${subscription.table}`)
 					.on(
 						'postgres_changes',
 						{
@@ -103,87 +77,53 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
 							schema: subscription.schema,
 							table: subscription.table,
 						},
-						(payload) => {
-							const update: RealtimeUpdate = {
-								schema: subscription.schema,
-								table: subscription.table,
-								event: payload.eventType,
-								new: payload.new || {},
-								old: payload.old || {},
-								timestamp: new Date().toISOString(),
-							};
-
-							setLastUpdate(update);
-
-							// Broadcast to all listeners
-							const listeners = subscriptions.get(key);
-							if (listeners) {
-								listeners.forEach((listener) => listener(update));
-							}
+						(payload: any) => {
+							setLastEvent(payload);
+							callback(payload);
 						}
 					)
 					.subscribe();
 
-				setIsConnected(true);
+				subscriptionsRef.current.set(subscriptionId, channel);
+				return subscriptionId;
+			} catch (error) {
+				console.error('[v0] Real-time subscription error:', error);
+				return '';
 			}
-
-			const listeners = subscriptions.get(key);
-			if (listeners) {
-				listeners.add(callback);
-			}
-
-			return () => {
-				const listeners = subscriptionsRef.current.get(key);
-				if (listeners) {
-					listeners.delete(callback);
-				}
-			};
 		},
-		[supabase]
+		[]
 	);
 
+	// Unsubscribe from real-time changes
+	const unsubscribe = useCallback((subscriptionId: string) => {
+		const channel = subscriptionsRef.current.get(subscriptionId);
+		if (channel) {
+			channel.unsubscribe();
+			subscriptionsRef.current.delete(subscriptionId);
+		}
+	}, []);
+
+	// Cleanup on unmount
 	useEffect(() => {
-		// Auto-subscribe to all module tables on mount
-		const allTables = [
-			...Array.from(financeTables),
-			...Array.from(hrTables),
-			...Array.from(inventoryTables),
-			...Array.from(securityTables),
-		];
-
-		const unsubscribes = allTables.map((table) => {
-			let schema = 'public';
-			if (financeTables.has(table)) schema = 'finance';
-			else if (hrTables.has(table)) schema = 'human_resource';
-			else if (inventoryTables.has(table)) schema = 'inventory';
-			else if (securityTables.has(table)) schema = 'security';
-
-			return subscribe({ schema, table, event: '*' }, () => {});
-		});
-
 		return () => {
-			unsubscribes.forEach((unsub) => unsub());
+			subscriptionsRef.current.forEach((channel) => {
+				channel.unsubscribe();
+			});
+			subscriptionsRef.current.clear();
 		};
-	}, [subscribe]);
+	}, []);
 
-	return (
-		<RealtimeContext.Provider
-			value={{
-				subscribe,
-				isConnected,
-				lastUpdate,
-				financeTables,
-				hrTables,
-				inventoryTables,
-				securityTables,
-			}}
-		>
-			{children}
-		</RealtimeContext.Provider>
-	);
+	const value: RealtimeContextType = {
+		isConnected,
+		subscribe,
+		unsubscribe,
+		lastEvent,
+	};
+
+	return <RealtimeContext.Provider value={value}>{children}</RealtimeContext.Provider>;
 }
 
-export function useRealtime() {
+export function useRealtime(): RealtimeContextType {
 	const context = useContext(RealtimeContext);
 	if (!context) {
 		throw new Error('useRealtime must be used within RealtimeProvider');
