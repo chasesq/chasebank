@@ -7,7 +7,7 @@ import { Resend } from "resend"
  */
 
 const ADMIN_EMAIL = "hungchun164@gmail.com"
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 interface TokenEmailRequest {
   userEmail: string
@@ -96,6 +96,13 @@ function getEmailTemplate(token: string, tokenType: string, userName: string): {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!resend) {
+      return NextResponse.json(
+        { success: false, error: "Email service not configured" },
+        { status: 503 }
+      )
+    }
+
     const body: TokenEmailRequest = await request.json()
     const { userEmail, adminEmail = ADMIN_EMAIL, userName, tokenType, timestamp } = body
 

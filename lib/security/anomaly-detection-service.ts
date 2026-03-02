@@ -6,7 +6,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 export interface AnomalyScore {
   score: number // 0-100
@@ -318,6 +318,11 @@ export class AnomalyDetectionService {
           </div>
         </div>
       `
+
+      if (!resend) {
+        console.warn('[v0] Resend not configured, skipping anomaly alert email')
+        return
+      }
 
       await resend.emails.send({
         from: 'security@resend.dev',
