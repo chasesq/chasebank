@@ -11,11 +11,7 @@ import React, {
 } from 'react';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
-/**
- * Local helper to check if Supabase is properly configured
- * This is defined locally to avoid circular imports and to work in the browser context
- * v2: Force cache clear
- */
+// v3: Local implementation
 function isSupabaseConfigured(): boolean {
 	if (typeof window === 'undefined') return false;
 	return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
