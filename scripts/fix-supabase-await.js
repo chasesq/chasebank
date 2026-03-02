@@ -5,10 +5,6 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.join(__dirname, '..');
 
-// Pattern to find createServiceClient() without await
-const pattern = /const\s+supabase\s*=\s*createServiceClient\(\)/g;
-const patternWithAwait = /const\s+supabase\s*=\s*await\s+createServiceClient\(\)/g;
-
 function walkDir(dir, callback) {
   const files = fs.readdirSync(dir);
   files.forEach(file => {
@@ -34,10 +30,16 @@ walkDir(projectRoot, (filePath) => {
     let content = fs.readFileSync(filePath, 'utf8');
     const originalContent = content;
     
-    // Fix: const supabase = createServiceClient() -> const supabase = await createServiceClient()
+    // Pattern 1: const supabase = createServiceClient()
     content = content.replace(
-      /const\s+supabase\s*=\s*createServiceClient\(\)/g,
-      'const supabase = await createServiceClient()'
+      /(\s+)(const|let|var)\s+(\w+)\s*=\s*createServiceClient\(\)/g,
+      '$1$2 $3 = await createServiceClient()'
+    );
+
+    // Pattern 2: Fix double await (in case it's already partially fixed)
+    content = content.replace(
+      /await\s+await\s+createServiceClient\(\)/g,
+      'await createServiceClient()'
     );
 
     if (content !== originalContent) {

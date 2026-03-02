@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // GET /api/accounts - Fetch all user accounts with real-time balances
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
 
     if (!userId) {
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 // POST /api/accounts - Create new account or link external account
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const { name, type, accountNumber, routingNumber } = await request.json()
 
