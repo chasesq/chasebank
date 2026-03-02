@@ -14,6 +14,7 @@ import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 /**
  * Local helper to check if Supabase is properly configured
  * This is defined locally to avoid circular imports and to work in the browser context
+ * v2: Force cache clear
  */
 function isSupabaseConfigured(): boolean {
 	if (typeof window === 'undefined') return false;
