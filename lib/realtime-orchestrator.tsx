@@ -11,7 +11,7 @@ import React, {
 } from 'react';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
-// Helper to check if Supabase is properly configured
+// Local helper function - no import needed
 function isSupabaseConfigured() {
 	return !!(typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 }

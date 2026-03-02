@@ -1,4 +1,4 @@
-import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Server-side Supabase client using service role key.
@@ -9,12 +9,12 @@ import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/
  *
  * IMPORTANT: Only use this in server-side API routes, never expose to client.
  */
-export function createServiceClient(): SupabaseClient {
+export function createServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   
   if (!url || !key) {
-    throw new Error('[v0] Missing Supabase environment variables (URL or SERVICE_ROLE_KEY)')
+    throw new Error('[v0] Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
   }
 
   const client = createSupabaseClient(url, key, {
@@ -23,6 +23,10 @@ export function createServiceClient(): SupabaseClient {
       persistSession: false,
     },
   })
+  
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('[v0] Failed to initialize Supabase client')
+  }
   
   return client
 }
