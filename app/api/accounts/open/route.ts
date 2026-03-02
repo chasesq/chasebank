@@ -15,7 +15,17 @@ interface OpenAccountRequest {
 // POST /api/accounts/open - Open a new Chase account
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServiceClient()
+    let supabase
+    try {
+      supabase = createServiceClient()
+    } catch (err) {
+      console.error('[v0] Failed to create Supabase client:', err)
+      return NextResponse.json(
+        { error: 'Database connection error' },
+        { status: 500 }
+      )
+    }
+    
     const body: OpenAccountRequest = await request.json()
 
     const { userId, accountType, initialDeposit, accountName } = body

@@ -9,7 +9,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
  *
  * IMPORTANT: Only use this in server-side API routes, never expose to client.
  */
-export function createClient() {
+export function createServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   
@@ -23,9 +23,4 @@ export function createClient() {
       persistSession: false,
     },
   })
-}
-
-// Alias for clarity - same as createClient but name is more explicit for service operations
-export async function createServiceClient() {
-  return createClient()
 }
