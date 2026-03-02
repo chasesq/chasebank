@@ -9,18 +9,23 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
  *
  * IMPORTANT: Only use this in server-side API routes, never expose to client.
  */
-export async function createClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
+export function createClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!url || !key) {
+    throw new Error('[v0] Missing Supabase environment variables (URL or SERVICE_ROLE_KEY)')
+  }
+
+  return createSupabaseClient(url, key, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
     },
-  )
+  })
 }
 
-// Alias for clarity  
-export const createServiceClient = createClient
+// Alias for clarity - same as createClient but name is more explicit for service operations
+export async function createServiceClient() {
+  return createClient()
+}

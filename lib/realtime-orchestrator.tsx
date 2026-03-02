@@ -11,9 +11,9 @@ import React, {
 } from 'react';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
-// Helper function to check if Supabase is configured
+// Helper to check if Supabase is properly configured
 function isSupabaseConfigured() {
-	return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+	return !!(typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 }
 
 interface RealtimeSubscription {
