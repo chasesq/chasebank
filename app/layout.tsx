@@ -51,14 +51,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased overflow-x-hidden overscroll-none touch-pan-y">
-        <ErrorBoundary>
-          <RealtimeProvider>
-            <BankingProvider>
-              {children}
-              <Toaster />
-            </BankingProvider>
-          </RealtimeProvider>
-        </ErrorBoundary>
+        <RealtimeProvider>
+          <BankingProvider>
+            {children}
+            <Toaster />
+          </BankingProvider>
+        </RealtimeProvider>
       </body>
     </html>
   )
