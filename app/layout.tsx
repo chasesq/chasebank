@@ -1,8 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from "@/components/ui/toaster"
 import { BankingProvider } from "@/lib/banking-context"
 import { RealtimeProvider } from "@/lib/realtime-orchestrator"
@@ -52,16 +50,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <Analytics />
-      </head>
       <body className="font-sans antialiased overflow-x-hidden overscroll-none touch-pan-y">
         <ErrorBoundary>
           <RealtimeProvider>
             <BankingProvider>
               {children}
               <Toaster />
-              <SpeedInsights />
             </BankingProvider>
           </RealtimeProvider>
         </ErrorBoundary>
