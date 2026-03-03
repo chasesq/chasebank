@@ -21,8 +21,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Enterprise Financial System",
-  description: "Integrated financial management with real-time updates",
+  title: "Chase Bank - Enterprise Financial System",
+  description: "Integrated financial management with real-time updates and instant account opening",
   generator: "v0.app",
   icons: {
     icon: [
