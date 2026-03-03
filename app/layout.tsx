@@ -52,13 +52,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Analytics />
+      </head>
       <body className="font-sans antialiased overflow-x-hidden overscroll-none touch-pan-y">
         <ErrorBoundary>
           <RealtimeProvider>
             <BankingProvider>
               {children}
               <Toaster />
-              <Analytics />
               <SpeedInsights />
             </BankingProvider>
           </RealtimeProvider>
