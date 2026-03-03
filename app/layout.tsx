@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { BankingProvider } from "@/lib/banking-context"
 import { RealtimeProvider } from "@/lib/realtime-orchestrator"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -59,6 +60,7 @@ export default function RootLayout({
             </BankingProvider>
           </RealtimeProvider>
         </ErrorBoundary>
+        <Analytics />
       </body>
     </html>
   )
