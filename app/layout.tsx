@@ -4,7 +4,6 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/toaster"
 import { BankingProvider } from "@/lib/banking-context"
 import { RealtimeProvider } from "@/lib/realtime-orchestrator"
-import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
