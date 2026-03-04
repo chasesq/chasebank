@@ -6,47 +6,28 @@ import { BankingProvider } from "@/lib/banking-context"
 import { RealtimeProvider } from "@/lib/realtime-orchestrator"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] })
+const _geistSans = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  minimumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
-  themeColor: "#0a4fa6",
-}
 
 export const metadata: Metadata = {
   title: "Chase Bank - Enterprise Financial System",
   description: "Integrated financial management with real-time updates and instant account opening",
   generator: "v0.app",
-  icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
-  },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#117aca",
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en">
       <body className="font-sans antialiased overflow-x-hidden overscroll-none touch-pan-y">
