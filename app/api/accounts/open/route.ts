@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/utils/supabase/server'
 
 interface OpenAccountRequest {
   userId: string
@@ -15,7 +15,7 @@ interface OpenAccountRequest {
 // POST /api/accounts/open - Open a new Chase account
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServiceClient()
+    const supabase = await createClient()
     const body: OpenAccountRequest = await request.json()
 
     const { userId, accountType, initialDeposit, accountName } = body
