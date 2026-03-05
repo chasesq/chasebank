@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Toaster } from "@/components/ui/toaster"
 import { BankingProvider } from "@/lib/banking-context"
 import { RealtimeProvider } from "@/lib/realtime-orchestrator"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const _geistSans = Geist({ subsets: ["latin"] })
@@ -37,6 +38,7 @@ export default function RootLayout({
             <Toaster />
           </BankingProvider>
         </RealtimeProvider>
+        <Analytics />
       </body>
     </html>
   )
