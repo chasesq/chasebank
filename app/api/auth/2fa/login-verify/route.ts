@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     // Get user with TOTP secret
     const { data: user, error: userError } = await supabase

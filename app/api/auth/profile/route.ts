@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     const { data: user, error } = await supabase
       .from('users')
@@ -59,7 +59,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     // Find user first
     const { data: user, error: findError } = await supabase

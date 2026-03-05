@@ -10,7 +10,7 @@ import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const adminId = request.headers.get('x-user-id')
     const role = request.headers.get('x-user-role')
     const {
@@ -316,7 +316,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const role = request.headers.get('x-user-role')
 
     // Verify admin access

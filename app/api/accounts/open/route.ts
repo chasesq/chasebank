@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/utils/supabase/server'
 
 interface OpenAccountRequest {
   userId: string
@@ -15,7 +15,7 @@ interface OpenAccountRequest {
 // POST /api/accounts/open - Open a new Chase account
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createClient()
     const body: OpenAccountRequest = await request.json()
 
     const { userId, accountType, initialDeposit, accountName } = body
@@ -123,25 +123,36 @@ export async function POST(request: NextRequest) {
 
     console.log('[v0] Account created successfully:', account[0].id)
 
+    // Return comprehensive account details for immediate real-time access
     return NextResponse.json({
       message: 'Account opened successfully',
       account: {
         id: account[0].id,
+        userId: account[0].user_id,
         type: accountType,
         accountNumber: accountNumber.slice(-4),
         fullAccountNumber: accountNumber,
         routingNumber,
         balance: initialDeposit,
+        availableBalance: initialDeposit,
         interestRate,
         status: 'active',
+        name: accountName,
         createdAt: account[0].created_at,
+        updatedAt: account[0].updated_at,
       },
       success: true,
+      realtime: true, // Flag for client to subscribe to real-time updates
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, must-revalidate',
+        'X-Real-Time': 'true',
+      }
     })
   } catch (error) {
-    console.error('[v0] Account opening error:', error)
+    console.error('[v0] Account opening error:', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
-      { error: 'Failed to open account' },
+      { error: 'Failed to open account: ' + (error instanceof Error ? error.message : 'Unknown error'), success: false },
       { status: 500 }
     )
   }

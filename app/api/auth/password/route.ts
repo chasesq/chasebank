@@ -12,7 +12,7 @@ import { generateAndStoreOTP, verifyOTP } from '@/lib/auth/otp-service'
 export async function POST(request: NextRequest) {
   try {
     const { action, userId, currentPassword, newPassword, email, otp } = await request.json()
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     if (action === 'change') {
       // Verify user provided current password

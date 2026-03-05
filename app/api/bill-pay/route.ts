@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // GET /api/bill-pay - Get all bills and payees
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
 
     if (!userId) {
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 // POST /api/bill-pay - Create or update bill
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const {
       accountId,
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/bill-pay - Remove bill
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
     const { searchParams } = new URL(request.url)
     const billId = searchParams.get('billId')

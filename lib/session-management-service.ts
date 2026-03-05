@@ -3,10 +3,18 @@
  * Handles real-time session tracking, device management, and cross-device notifications
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy-initialize Resend client only when needed
+let resend: Resend | null = null
+
+function getResendClient() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resend
+}
 
 export interface SessionInfo {
   id: string
@@ -279,7 +287,7 @@ export class SessionManagementService {
         </div>
       `
 
-      await resend.emails.send({
+      await getResendClient()?.emails.send({
         from: 'security@resend.dev',
         to: email,
         subject: 'New Device Detected on Your Account',
@@ -330,7 +338,7 @@ export class SessionManagementService {
         </div>
       `
 
-      await resend.emails.send({
+      await getResendClient()?.emails.send({
         from: 'security@resend.dev',
         to: email,
         subject: 'Session Ended on Your Account',
@@ -380,7 +388,7 @@ export class SessionManagementService {
         </div>
       `
 
-      await resend.emails.send({
+      await getResendClient()?.emails.send({
         from: 'security@resend.dev',
         to: email,
         subject: '🔒 All Sessions Terminated',

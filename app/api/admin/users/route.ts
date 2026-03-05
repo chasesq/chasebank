@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const adminId = request.headers.get('x-user-id')
     const role = request.headers.get('x-user-role')
 
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const adminId = request.headers.get('x-user-id')
     const role = request.headers.get('x-user-role')
     const { action } = await request.json()

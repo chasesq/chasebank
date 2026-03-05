@@ -9,7 +9,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // GET /api/dashboard - Get all dashboard data
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     const userId = request.headers.get('x-user-id')
 
     if (!userId) {

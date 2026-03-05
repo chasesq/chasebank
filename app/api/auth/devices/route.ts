@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     // Get user's devices
     const { data: users, error: findError } = await supabase
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     // Get user
     const { data: users, error: findError } = await supabase
@@ -161,7 +161,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     // Get user
     const { data: users, error: findError } = await supabase

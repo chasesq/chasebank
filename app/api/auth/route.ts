@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const { action, email, password, name, phone, otp, userId } = await request.json()
 
     // Initialize Supabase client
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
 
     if (action === 'signup') {
       // Validate password strength
