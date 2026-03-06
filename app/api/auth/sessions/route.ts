@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SessionManagementService } from '@/lib/session-management-service'
 import { AnomalyDetectionService } from '@/lib/security/anomaly-detection-service'
+import { sessionManager } from '@/lib/auth/session-manager'
 
 // Simulated in-memory session store (in production, use a database)
 const sessionStore = new Map<string, {
@@ -108,17 +109,27 @@ export async function POST(request: NextRequest) {
 
     // Get all active sessions
     if (action === 'get-sessions') {
+      const userId = email || 'user1'
+      
+      // Get from new session manager
+      const activeSessions = sessionManager.getUserSessions(userId)
+      
+      // Fallback to legacy sessions
       const sessions = Array.from(sessionStore.values())
         .filter(s => s.userId === 'user1')
         .map(s => ({
           ...s,
           current: s.id === 'session_1', // Mark current session
+          expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(), // 8 hours
+          timeRemaining: 8 * 60 * 60 * 1000,
+          isExpiring: false,
         }))
         .sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime())
 
       return NextResponse.json({
         success: true,
         sessions,
+        activeSessions: activeSessions.length,
         total: sessions.length,
         timestamp: new Date().toISOString(),
       })
@@ -222,8 +233,26 @@ export async function POST(request: NextRequest) {
     // Refresh session activity (heartbeat)
     if (action === 'heartbeat') {
       const targetId = sessionId || 'session_1'
-      const session = sessionStore.get(targetId)
       
+      // Update in new session manager
+      if (targetId && email) {
+        const session = sessionManager.updateSessionActivity(targetId)
+        const isExpiring = sessionManager.isSessionExpiring(targetId)
+        
+        if (session) {
+          return NextResponse.json({
+            success: true,
+            sessionId: session.sessionId,
+            expiresAt: new Date(session.expiresAt).toISOString(),
+            timeRemaining: session.expiresAt - Date.now(),
+            isExpiring,
+            timestamp: new Date().toISOString(),
+          })
+        }
+      }
+      
+      // Fallback to legacy
+      const session = sessionStore.get(targetId)
       if (session) {
         session.lastActive = new Date().toISOString()
         sessionStore.set(targetId, session)

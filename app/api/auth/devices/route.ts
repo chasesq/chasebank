@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
+import { deviceFingerprintService } from '@/lib/auth/device-fingerprint-service'
 
 interface Device {
   id: string
   name: string
   lastUsed: string
   isCurrentDevice: boolean
+  type?: string
+  browser?: string
 }
 
 export async function GET(request: NextRequest) {
@@ -38,25 +41,36 @@ export async function GET(request: NextRequest) {
     const user = users[0]
     let devices: Device[] = []
 
-    if (user.totp_devices) {
-      try {
-        devices = JSON.parse(user.totp_devices)
-      } catch (error) {
-        console.error('[v0] Failed to parse devices:', error)
-      }
+    // Get trusted devices from fingerprint service
+    const trustedDevices = deviceFingerprintService.getTrustedDevices(user.id)
+    
+    if (trustedDevices.length > 0) {
+      devices = trustedDevices.map(device => ({
+        id: device.fingerprintId,
+        name: device.name,
+        lastUsed: new Date(device.lastUsed).toISOString(),
+        isCurrentDevice: device.fingerprintId === deviceId,
+        type: 'trusted',
+      }))
     }
 
-    // Mark current device if deviceId provided
-    if (deviceId) {
-      devices = devices.map(d => ({
-        ...d,
-        isCurrentDevice: d.id === deviceId,
-      }))
+    // Also check legacy format if it exists
+    if (user.totp_devices) {
+      try {
+        const legacyDevices = JSON.parse(user.totp_devices)
+        devices = [...devices, ...legacyDevices.map((d: any) => ({
+          ...d,
+          isCurrentDevice: d.id === deviceId,
+        }))]
+      } catch (error) {
+        console.error('Failed to parse legacy devices:', error)
+      }
     }
 
     return NextResponse.json({
       success: true,
       devices,
+      trustedDeviceCount: trustedDevices.length,
     })
   } catch (error) {
     console.error('[v0] Devices endpoint error:', error)
@@ -94,24 +108,29 @@ export async function POST(request: NextRequest) {
     }
 
     const user = users[0]
-    let devices: Device[] = []
 
+    // Use fingerprint service to trust the device
+    const device = deviceFingerprintService.trustDevice(
+      user.id,
+      deviceId,
+      deviceName,
+      30 // 30 days
+    )
+
+    // Also update legacy format for compatibility
+    let devices: Device[] = []
     if (user.totp_devices) {
       try {
         devices = JSON.parse(user.totp_devices)
       } catch (error) {
-        console.error('[v0] Failed to parse existing devices:', error)
+        console.error('Failed to parse existing devices:', error)
       }
     }
 
-    // Check if device already exists
     const existingDeviceIndex = devices.findIndex(d => d.id === deviceId)
-
     if (existingDeviceIndex >= 0) {
-      // Update last used time
       devices[existingDeviceIndex].lastUsed = new Date().toISOString()
     } else {
-      // Add new device
       devices.push({
         id: deviceId,
         name: deviceName,
@@ -120,8 +139,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Update user record
-    const { error: updateError } = await supabase
+    // Update user record for legacy format
+    await supabase
       .from('users')
       .update({
         totp_devices: JSON.stringify(devices),
@@ -129,16 +148,14 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', user.id)
 
-    if (updateError) {
-      return NextResponse.json(
-        { error: updateError.message },
-        { status: 500 }
-      )
-    }
-
     return NextResponse.json({
       success: true,
-      devices,
+      device: {
+        id: device.fingerprintId,
+        name: device.name,
+        createdAt: new Date(device.createdAt).toISOString(),
+        expiresAt: new Date(device.expiresAt).toISOString(),
+      },
       message: 'Device registered successfully',
     })
   } catch (error) {
@@ -177,21 +194,24 @@ export async function DELETE(request: NextRequest) {
     }
 
     const user = users[0]
-    let devices: Device[] = []
 
+    // Use fingerprint service to remove the device
+    deviceFingerprintService.removeTrustedDevice(user.id, deviceId)
+
+    // Also remove from legacy format for compatibility
+    let devices: Device[] = []
     if (user.totp_devices) {
       try {
         devices = JSON.parse(user.totp_devices)
       } catch (error) {
-        console.error('[v0] Failed to parse devices:', error)
+        console.error('Failed to parse devices:', error)
       }
     }
 
-    // Remove device
     devices = devices.filter(d => d.id !== deviceId)
 
-    // Update user record
-    const { error: updateError } = await supabase
+    // Update user record for legacy format
+    await supabase
       .from('users')
       .update({
         totp_devices: JSON.stringify(devices),
@@ -199,16 +219,8 @@ export async function DELETE(request: NextRequest) {
       })
       .eq('id', user.id)
 
-    if (updateError) {
-      return NextResponse.json(
-        { error: updateError.message },
-        { status: 500 }
-      )
-    }
-
     return NextResponse.json({
       success: true,
-      devices,
       message: 'Device removed successfully',
     })
   } catch (error) {
