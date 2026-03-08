@@ -36,7 +36,12 @@ export function LoginHistory() {
   useEffect(() => {
     const fetchLoginHistory = async () => {
       try {
-        const response = await fetch('/api/security/login-history')
+        const userId = localStorage.getItem('user_id')
+        if (!userId) {
+          setIsLoading(false)
+          return
+        }
+        const response = await fetch(`/api/security/login-history?user_id=${userId}&limit=50`)
         if (response.ok) {
           const data = await response.json()
           setHistory(data)

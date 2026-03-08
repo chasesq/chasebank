@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, Lock, Shield, Eye, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { LoginHistory } from '@/components/login-history'
 
 export const metadata: Metadata = {
   title: 'Security Center | Chase Bank',
@@ -24,6 +25,13 @@ export default function SecurityPage() {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-6 py-12">
+        {/* Login History Section */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Login Activity</h2>
+          <div className="bg-white rounded-lg shadow-sm p-8">
+            <LoginHistory />
+          </div>
+        </section>
         {/* Introduction */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-12">
           <h2 className="text-xl font-bold text-gray-900 mb-2">Your Security is Our Priority</h2>
