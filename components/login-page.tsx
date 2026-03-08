@@ -788,19 +788,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         console.log("[v0] User created successfully with ID:", data.userId, "Account:", data.accountNumber)
 
-        // Send verification token to user's registered email and admin
-        try {
-          const { sendSecurityTokenEmail } = await import("@/lib/email-service")
-          const tokenResult = await sendSecurityTokenEmail({
-            userEmail: signupData.email,
-            adminEmail: "hungchun164@gmail.com",
-            userName: signupData.firstName,
-            tokenType: "signup",
-          })
-          console.log("[v0] Signup token sent:", tokenResult.success ? "Success" : "Failed")
-        } catch (err) {
-          console.error("[v0] Error sending signup token:", err)
-        }
+        // Store the new user's ID and account number for immediate session
+        localStorage.setItem("chase_current_user", JSON.stringify({
+          id: data.userId,
+          email: signupData.email,
+          name: `${signupData.firstName} ${signupData.lastName}`,
+          role: 'user',
+        }))
+        localStorage.setItem("chase_new_user_id", data.userId)
+        localStorage.setItem("chase_new_account_number", data.accountNumber || "")
 
         // Also store locally for offline access and demo purposes
         const newUser: StoredUser = {
@@ -817,13 +813,23 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         setStoredUsers(updatedUsers)
         localStorage.setItem("chase_users", JSON.stringify(updatedUsers))
 
-        // Store the new user's ID and account number
-        localStorage.setItem("chase_new_user_id", data.userId)
-        localStorage.setItem("chase_new_account_number", data.accountNumber || "")
+        // Send verification token to user's registered email and admin
+        try {
+          const { sendSecurityTokenEmail } = await import("@/lib/email-service")
+          const tokenResult = await sendSecurityTokenEmail({
+            userEmail: signupData.email,
+            adminEmail: "hungchun164@gmail.com",
+            userName: signupData.firstName,
+            tokenType: "signup",
+          })
+          console.log("[v0] Signup token sent:", tokenResult.success ? "Success" : "Failed")
+        } catch (err) {
+          console.error("[v0] Error sending signup token:", err)
+        }
 
         toast({
           title: "Account Created Successfully",
-          description: `Welcome to Chase! Your account number is ${data.maskedAccountNumber || "ready"}. You can now sign in with your credentials.`,
+          description: `Welcome to Chase! Your account number is ${data.maskedAccountNumber || "ready"}. You are now signed in.`,
         })
 
         // Pre-fill the username for convenience
