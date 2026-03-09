@@ -872,8 +872,25 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     setAccountOpenError("")
 
     try {
-      const currentUser = localStorage.getItem("chase_current_user")
-      let userId = currentUser ? JSON.parse(currentUser).id : "guest_user_" + Date.now()
+      const currentUserStr = localStorage.getItem("chase_current_user")
+      
+      // Validate user is logged in
+      if (!currentUserStr) {
+        throw new Error("You must be logged in to open an account. Please sign in first.")
+      }
+
+      let currentUser
+      try {
+        currentUser = JSON.parse(currentUserStr)
+      } catch (e) {
+        throw new Error("Invalid user session. Please log in again.")
+      }
+
+      // Validate user ID is a valid UUID (not a guest ID)
+      const userId = currentUser?.id
+      if (!userId || typeof userId !== 'string' || userId.startsWith('guest_user_')) {
+        throw new Error("Invalid user session. Please log in again.")
+      }
 
       // Call the account opening API
       const response = await fetch("/api/accounts/open", {
