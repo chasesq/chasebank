@@ -888,6 +888,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
       // Validate user ID is a valid UUID (not a guest ID)
       const userId = currentUser?.id
+      
       if (!userId || typeof userId !== 'string' || userId.startsWith('guest_user_')) {
         throw new Error("Invalid user session. Please log in again.")
       }
